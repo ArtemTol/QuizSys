@@ -1,0 +1,918 @@
+янв. 16, 2025 4:49:10 PM app.Runner main
+INFO: Запуск программы...
+янв. 16, 2025 4:49:10 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 4:49:10 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 4:49:10 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 4:49:11 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 4:49:11 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+
+import org.junit.jupiter.api.*;
+import org.mockito.*;
+
+import java.sql.*;
+
+import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+class SqlOperationsTest {
+
+    @Mock
+    private Connection mockConnection;
+
+    @Mock
+    private PreparedStatement mockPreparedStatement;
+
+    @Mock
+    private ResultSet mockResultSet;
+
+    private SqlOperations sqlOperations;
+
+    @BeforeEach
+    void setUp() throws SQLException {
+        MockitoAnnotations.openMocks(this);
+        // Замокированное подключение передаётся в экземпляр SqlOperations
+        sqlOperations = new SqlOperations();
+        sqlOperations.con = mockConnection;
+    }
+
+    @Test
+    void testNewUser_Success() throws SQLException {
+        // Настройка мока для метода prepareStatement
+        when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
+
+        // Вызов тестируемого метода
+        sqlOperations.newUser("TestName", "TestUser", "TestPassword");
+
+        // Проверка, что метод был вызван с корректными параметрами
+        verify(mockPreparedStatement).setString(1, "TestName");
+        verify(mockPreparedStatement).setString(2, "TestUser");
+        verify(mockPreparedStatement).setString(3, "TestPassword");
+        verify(mockPreparedStatement).executeUpdate();
+    }
+
+    @Test
+    void testAuthUser_Success() throws SQLException {
+        // Настройка мока для результата запроса
+        when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
+        when(mockPreparedStatement.executeQuery()).thenReturn(mockResultSet);
+        when(mockResultSet.next()).thenReturn(true);
+        when(mockResultSet.getString("pass")).thenReturn("TestPassword");
+        when(mockResultSet.getInt("id")).thenReturn(1);
+
+        // Вызов тестируемого метода
+        int userId = sqlOperations.authUser("TestUser", "TestPassword");
+
+        // Проверка результата
+        assertEquals(1, userId);
+        verify(mockPreparedStatement).setString(1, "TestUser");
+    }
+
+    @Test
+    void testAuthUser_UserNotFound() throws SQLException {
+        when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
+        when(mockPreparedStatement.executeQuery()).thenReturn(mockResultSet);
+        when(mockResultSet.next()).thenReturn(false);
+
+        int userId = sqlOperations.authUser("NonExistentUser", "AnyPassword");
+
+        assertEquals(-1, userId); // Ожидаемое значение для пользователя, которого нет
+    }
+
+    @Test
+    void testNewQuestion_Success() throws SQLException {
+        when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
+
+        sqlOperations.newQuestion("Quiz1", "Question1", "Option1", "Option2", "Option3", "Option4");
+
+        verify(mockPreparedStatement).setString(1, "Quiz1");
+        verify(mockPreparedStatement).setString(2, "Question1");
+        verify(mockPreparedStatement).setString(3, "Option1");
+        verify(mockPreparedStatement).setString(4, "Option2");
+        verify(mockPreparedStatement).setString(5, "Option3");
+        verify(mockPreparedStatement).setString(6, "Option4");
+        verify(mockPreparedStatement).executeUpdate();
+    }
+
+    @Test
+    void testGetQuestions_Success() throws SQLException {
+        when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
+        when(mockPreparedStatement.executeQuery()).thenReturn(mockResultSet);
+
+        ResultSet resultSet = sqlOperations.getQuestions("Quiz1");
+
+        assertNotNull(resultSet);
+        verify(mockPreparedStatement).setString(1, "Quiz1");
+    }
+
+    @Test
+    void testAddTotal_Success() throws SQLException {
+        when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
+
+        sqlOperations.addTotal();
+
+        verify(mockPreparedStatement).executeUpdate();
+    }янв. 16, 2025 4:58:52 PM app.Runner main
+INFO: Запуск программы...
+янв. 16, 2025 4:58:52 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 4:58:52 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 4:58:52 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 4:58:53 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 4:58:53 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 4:58:59 PM service.SqlOperations authUser
+INFO: Авторизация пользователя: gg
+янв. 16, 2025 4:58:59 PM service.SqlOperations authUser
+INFO: Успешная авторизация пользователя: gg
+янв. 16, 2025 4:58:59 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 4:58:59 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 4:58:59 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 4:58:59 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 4:58:59 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 4:58:59 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 4:58:59 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 4:58:59 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 4:58:59 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 4:58:59 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:07:02 PM app.Runner main
+INFO: Запуск программы...
+янв. 16, 2025 5:07:02 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:07:02 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:07:02 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:07:03 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:07:03 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:07:08 PM service.SqlOperations authUser
+INFO: Авторизация пользователя: gg
+янв. 16, 2025 5:07:09 PM service.SqlOperations authUser
+INFO: Успешная авторизация пользователя: gg
+янв. 16, 2025 5:07:09 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:07:09 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:07:09 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:07:09 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:07:09 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:07:09 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:07:09 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:07:09 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:07:09 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:07:09 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:07:25 PM service.SqlOperations userQuestionAdd
+INFO: Добавление пользователя к викторине: JVQUA
+янв. 16, 2025 5:07:25 PM service.SqlOperations userQuestionAdd
+INFO: Пользователь успешно добавлен к викторине: JVQUA
+янв. 16, 2025 5:07:25 PM service.SqlOperations newQuestion
+INFO: Добавление нового вопроса в викторину: JVQUA
+янв. 16, 2025 5:07:25 PM service.SqlOperations newQuestion
+INFO: Вопрос успешно добавлен в викторину: JVQUA
+янв. 16, 2025 5:07:27 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:07:27 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:07:27 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:07:27 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:07:27 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:08:29 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:08:29 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:08:29 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:08:29 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:08:29 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:08:48 PM app.Runner main
+INFO: Запуск программы...
+янв. 16, 2025 5:08:48 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:08:48 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:08:48 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:08:48 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:08:48 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:08:57 PM service.SqlOperations authUser
+INFO: Авторизация пользователя: gg
+янв. 16, 2025 5:08:57 PM service.SqlOperations authUser
+INFO: Успешная авторизация пользователя: gg
+янв. 16, 2025 5:08:57 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:08:57 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:08:57 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:08:57 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:08:57 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:08:57 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:08:57 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:08:57 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:08:57 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:08:57 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:08:58 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:08:58 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:08:58 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:08:58 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:08:58 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:09:02 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:09:02 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:09:02 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:09:03 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:09:03 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:09:07 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:09:07 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:09:07 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:09:07 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:09:07 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:09:19 PM service.SqlOperations authUser
+INFO: Авторизация пользователя: gg
+янв. 16, 2025 5:09:19 PM service.SqlOperations authUser
+INFO: Успешная авторизация пользователя: gg
+янв. 16, 2025 5:09:19 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:09:19 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:09:19 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:09:19 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:09:19 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:09:19 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:09:19 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:09:19 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:09:19 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:09:19 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:09:19 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:09:19 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:09:19 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:09:19 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:09:19 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:16:15 PM app.Runner main
+INFO: Запуск программы...
+янв. 16, 2025 5:16:15 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:16:15 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:16:15 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:16:15 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:16:15 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:17:32 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:17:32 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:17:32 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:17:32 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:17:32 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:17:32 PM service.SqlOperations newUser
+INFO: Добавление нового пользователя: john_userboy
+янв. 16, 2025 5:17:32 PM service.SqlOperations newUser
+INFO: Пользователь успешно добавлен: john_userboy
+янв. 16, 2025 5:17:50 PM service.SqlOperations authUser
+INFO: Авторизация пользователя: john_userboy
+янв. 16, 2025 5:17:50 PM service.SqlOperations authUser
+INFO: Успешная авторизация пользователя: john_userboy
+янв. 16, 2025 5:17:50 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:17:50 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:17:50 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:17:50 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:17:50 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:17:50 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:17:50 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:17:50 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:17:50 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:17:50 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:17:51 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:17:51 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:17:51 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:17:51 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:17:51 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:38:07 PM app.Runner main
+INFO: Запуск программы...
+янв. 16, 2025 5:38:07 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:38:07 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:38:07 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:38:07 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:38:07 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:38:59 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:38:59 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:38:59 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:38:59 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:38:59 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:38:59 PM service.SqlOperations newUser
+INFO: Добавление нового пользователя: misterkto
+янв. 16, 2025 5:38:59 PM service.SqlOperations newUser
+INFO: Пользователь успешно добавлен: misterkto
+янв. 16, 2025 5:39:14 PM service.SqlOperations authUser
+INFO: Авторизация пользователя: misterkto
+янв. 16, 2025 5:39:14 PM service.SqlOperations authUser
+INFO: Успешная авторизация пользователя: misterkto
+янв. 16, 2025 5:39:14 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:39:14 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:39:14 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:39:14 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:39:14 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:39:14 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:39:14 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:39:14 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:39:14 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:39:14 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:40:11 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:40:11 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:40:11 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:40:12 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:40:12 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:40:20 PM service.SqlOperations userQuestionAdd
+INFO: Добавление пользователя к викторине: LJOMK
+янв. 16, 2025 5:40:20 PM service.SqlOperations userQuestionAdd
+INFO: Пользователь успешно добавлен к викторине: LJOMK
+янв. 16, 2025 5:40:20 PM service.SqlOperations newQuestion
+INFO: Добавление нового вопроса в викторину: LJOMK
+янв. 16, 2025 5:40:20 PM service.SqlOperations newQuestion
+INFO: Вопрос успешно добавлен в викторину: LJOMK
+янв. 16, 2025 5:40:20 PM service.SqlOperations newQuestion
+INFO: Добавление нового вопроса в викторину: LJOMK
+янв. 16, 2025 5:40:20 PM service.SqlOperations newQuestion
+INFO: Вопрос успешно добавлен в викторину: LJOMK
+янв. 16, 2025 5:40:23 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:40:23 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:40:23 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:40:23 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:40:23 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:40:34 PM app.Runner main
+INFO: Запуск программы...
+янв. 16, 2025 5:40:34 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:40:34 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:40:34 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:40:34 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:40:34 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:40:45 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:40:45 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:40:45 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:40:45 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:40:45 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:41:16 PM service.SqlOperations authUser
+INFO: Авторизация пользователя: misterkto
+янв. 16, 2025 5:41:16 PM service.SqlOperations authUser
+INFO: Успешная авторизация пользователя: misterkto
+янв. 16, 2025 5:41:16 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:41:16 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:41:16 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:41:16 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:41:16 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:41:16 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:41:16 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:41:16 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:41:16 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:41:16 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:41:17 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:41:17 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:41:17 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:41:17 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:41:17 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:41:49 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:41:49 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:41:49 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:41:49 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:41:49 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:42:11 PM app.Runner main
+INFO: Запуск программы...
+янв. 16, 2025 5:42:11 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:42:11 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:42:11 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:42:12 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:42:12 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:42:19 PM service.SqlOperations authUser
+INFO: Авторизация пользователя: misterkto
+янв. 16, 2025 5:42:19 PM service.SqlOperations authUser
+INFO: Успешная авторизация пользователя: misterkto
+янв. 16, 2025 5:42:19 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:42:19 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:42:19 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:42:19 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:42:19 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:42:19 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:42:19 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:42:19 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:42:20 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:42:20 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:42:20 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:42:20 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:42:20 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:42:20 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:42:20 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:43:14 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 5:43:14 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 5:43:14 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 5:43:14 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 5:43:14 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:03:40 PM service.SqlOperations authUser
+INFO: Авторизация пользователя: gg
+янв. 16, 2025 10:03:40 PM service.SqlOperations authUser
+INFO: Успешная авторизация пользователя: gg
+янв. 16, 2025 10:03:40 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:03:40 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:03:40 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:03:40 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:03:40 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:03:40 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:03:40 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:03:40 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:03:40 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:03:40 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:03:42 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:03:42 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:03:42 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:03:42 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:03:42 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:05:31 PM app.Runner main
+INFO: Запуск программы...
+янв. 16, 2025 10:05:32 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:05:32 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:05:32 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:05:32 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:05:32 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:05:48 PM service.SqlOperations authUser
+INFO: Авторизация пользователя: gg
+янв. 16, 2025 10:05:48 PM service.SqlOperations authUser
+INFO: Успешная авторизация пользователя: gg
+янв. 16, 2025 10:05:48 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:05:48 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:05:48 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:05:48 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:05:48 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:05:48 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:05:48 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:05:48 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:05:48 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:05:48 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:05:49 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:05:49 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:05:49 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:05:49 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:05:49 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:06:40 PM service.SqlOperations userQuestionAdd
+INFO: Добавление пользователя к викторине: OJPQZ
+янв. 16, 2025 10:06:40 PM service.SqlOperations userQuestionAdd
+INFO: Пользователь успешно добавлен к викторине: OJPQZ
+янв. 16, 2025 10:06:40 PM service.SqlOperations newQuestion
+INFO: Добавление нового вопроса в викторину: OJPQZ
+янв. 16, 2025 10:06:40 PM service.SqlOperations newQuestion
+INFO: Вопрос успешно добавлен в викторину: OJPQZ
+янв. 16, 2025 10:06:40 PM service.SqlOperations newQuestion
+INFO: Добавление нового вопроса в викторину: OJPQZ
+янв. 16, 2025 10:06:40 PM service.SqlOperations newQuestion
+INFO: Вопрос успешно добавлен в викторину: OJPQZ
+янв. 16, 2025 10:06:42 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:06:42 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:06:42 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:06:42 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:06:42 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:06:47 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:06:47 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:06:47 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:06:47 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:06:47 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:06:49 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:06:49 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:06:49 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:06:49 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:06:49 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:07:03 PM service.SqlOperations authUser
+INFO: Авторизация пользователя: GG
+янв. 16, 2025 10:07:03 PM service.SqlOperations authUser
+INFO: Успешная авторизация пользователя: GG
+янв. 16, 2025 10:07:03 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:07:03 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:07:03 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:07:03 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:07:03 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:07:03 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:07:03 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:07:03 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:07:03 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:07:03 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:07:05 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:07:05 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:07:05 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:07:05 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:07:05 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:12:22 PM app.Runner main
+INFO: Запуск программы...
+янв. 16, 2025 10:12:22 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:12:22 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:12:22 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:12:23 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:12:23 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:12:28 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:12:28 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:12:28 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:12:28 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:12:28 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:12:49 PM app.Runner main
+INFO: Запуск программы...
+янв. 16, 2025 10:12:49 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:12:49 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:12:49 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:12:49 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:12:49 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:12:51 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:12:51 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:12:51 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:12:51 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:12:51 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:13:02 PM service.SqlOperations authUser
+INFO: Авторизация пользователя: GG
+янв. 16, 2025 10:13:02 PM service.SqlOperations authUser
+INFO: Успешная авторизация пользователя: GG
+янв. 16, 2025 10:13:02 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:13:02 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:13:02 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:13:02 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:13:02 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:13:02 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:13:02 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:13:02 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:13:02 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:13:02 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:13:03 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:13:03 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:13:03 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:13:03 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:13:03 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:13:26 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:13:26 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:13:26 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:13:26 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:13:26 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:13:28 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:13:28 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:13:28 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:13:29 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:13:29 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:13:41 PM app.Runner main
+INFO: Запуск программы...
+янв. 16, 2025 10:13:41 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:13:41 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:13:41 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:13:42 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:13:42 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:13:45 PM service.SqlOperations authUser
+INFO: Авторизация пользователя: GG
+янв. 16, 2025 10:13:45 PM service.SqlOperations authUser
+WARNING: Неверный пароль для пользователя: GG
+янв. 16, 2025 10:13:49 PM service.SqlOperations authUser
+INFO: Авторизация пользователя: GG
+янв. 16, 2025 10:13:49 PM service.SqlOperations authUser
+INFO: Успешная авторизация пользователя: GG
+янв. 16, 2025 10:13:49 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:13:49 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:13:49 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:13:49 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:13:49 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:13:49 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:13:49 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:13:49 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:13:49 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:13:49 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:13:50 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:13:50 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:13:50 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:13:50 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:13:50 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:13:54 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:13:54 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:13:54 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:13:54 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:13:54 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:13:56 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+янв. 16, 2025 10:13:56 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+янв. 16, 2025 10:13:56 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+янв. 16, 2025 10:13:56 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+янв. 16, 2025 10:13:56 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+апр. 01, 2025 4:26:28 PM app.Runner main
+INFO: Запуск программы...
+апр. 01, 2025 4:26:28 PM service.SqlOperations <init>
+INFO: Загрузка файла настроек для базы данных.
+апр. 01, 2025 4:26:28 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root
+апр. 01, 2025 4:26:28 PM service.SqlOperations <init>
+INFO: Подключение к базе данных...
+апр. 01, 2025 4:26:29 PM service.SqlOperations <init>
+INFO: Соединение с базой данных успешно установлено.
+апр. 01, 2025 4:26:29 PM service.SqlOperations <init>
+INFO: Параметры подключения: URL = jdbc:mysql://localhost:3306/survey, User = root

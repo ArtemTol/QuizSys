@@ -1,0 +1,113 @@
+<!--
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.sexygroup</groupId>
+  <artifactId>quiz_system</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <name>Archetype - quiz_system</name>
+  <url>http://maven.apache.org</url>
+
+  <dependencies>
+    &lt;!&ndash; MySQL JDBC Driver &ndash;&gt;
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>8.0.33</version> &lt;!&ndash; mysql версия &ndash;&gt;
+    </dependency>
+
+    &lt;!&ndash; JUnit (для тестирования мб) &ndash;&gt;
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.13.2</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+
+  <build>
+    <plugins>
+      &lt;!&ndash; Плагин Maven для компиляции &ndash;&gt;
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
+        <configuration>
+          <source>23</source> &lt;!&ndash; Java, версия &ndash;&gt;
+          <target>23</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.sexygroup</groupId>
+  <artifactId>quiz_system</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <name>Archetype - quiz_system</name>
+  <url>http://maven.apache.org</url>
+
+  <dependencies>
+    <!-- MySQL JDBC Driver -->
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>8.0.33</version> <!-- mysql версия -->
+    </dependency>
+      <!-- Mockito Core -->
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>5.5.0</version>
+        <scope>test</scope>
+      </dependency>
+
+      <!-- Mockito JUnit Integration -->
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-junit-jupiter</artifactId>
+        <version>5.5.0</version>
+        <scope>test</scope>
+      </dependency>
+
+      <!-- JUnit 5 -->
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter</artifactId>
+        <version>5.10.0</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+
+
+  <build>
+    <plugins>
+      <!-- Maven Compiler Plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
+        <configuration>
+          <source>17</source> <!-- Укажите текущую версию Java -->
+          <target>17</target>
+        </configuration>
+      </plugin>
+
+      <!-- Maven Surefire Plugin (для запуска тестов) -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <includes>
+            <include>**/*Test.java</include>
+          </includes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
